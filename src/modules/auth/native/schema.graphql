@@ -1,0 +1,61 @@
+enum Status {
+  UNCONFIRMED
+  ACTIVE
+  SUSPENDED
+}
+
+extend type User {
+  username: String!
+  displayName: String!
+  password: String!
+  email: String!
+  status: Status!
+  confirmationCode: String
+  forgotPasswordCode: String
+}
+
+type Token {
+  accessToken: String!
+}
+
+type Query {
+  me: User
+  findUserByUsername(username: String!): User!
+  findUserByEmail(email: String!): User!
+  findUsersByStatus(status: Status!): [User]
+
+  isUsernameUnique(username: String!): Boolean!
+  isEmailUnique(email: String!): Boolean!
+}
+
+type Mutation {
+  loginUser(username: String!, password: String!): Token!
+
+  registerUser(data: RegisterUserInput!): Boolean!
+  registerUserCode(code: String!): Token!
+  resendUserCode(email: String!): Boolean!
+
+  forgotPassword(email: String!): Boolean!
+  forgotPasswordCode(code: String!): Token!
+
+  changePassword(data: ChangePasswordInput!): Boolean!
+  changeEmail(data: ChangeEmailInput!): Boolean!
+}
+
+input RegisterUserInput {
+  username: String!
+  password: String!
+  email: String!
+}
+
+input ChangeEmailInput {
+  username: String!
+  password: String!
+  newEmail: String!
+}
+
+input ChangePasswordInput {
+  username: String!
+  oldPassword: String!
+  newPassword: String!
+}
