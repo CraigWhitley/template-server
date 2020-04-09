@@ -6,7 +6,7 @@ import {
   usernameLength,
   passwordLength,
   passwordFormat,
-  emailFormat
+  emailFormat,
 } from '../../../lib/validate';
 
 const MIN_USERNAME_LENGTH = 5;
@@ -45,7 +45,7 @@ export class NativeAuthProvider {
   registerUser = async ({
     username,
     email,
-    password
+    password,
   }: RegisterUserInput): Promise<Boolean> => {
     /* #region Validation */
 
@@ -56,7 +56,7 @@ export class NativeAuthProvider {
       logger.warn({
         message:
           'User managed to bypass both client and graphql "required" validation on either the username, password or email.',
-        meta: 'native-provider'
+        meta: 'native-provider',
       });
       throw new Error('All fields are required.');
     }
@@ -92,7 +92,7 @@ export class NativeAuthProvider {
           password: hashedPassword,
           email: emailToLower,
           status: Status.UNCONFIRMED,
-          confirmationCode: confirmationCode
+          confirmationCode: confirmationCode,
         });
 
         //TODO: Send email to user with callback and code
@@ -106,7 +106,7 @@ export class NativeAuthProvider {
     } else {
       logger.error({
         message: 'User creation failed: cannot hash password',
-        meta: 'native-provider'
+        meta: 'native-provider',
       });
       throw new Error(NativeAuthModel.defaultErrorMessage);
     }
@@ -116,7 +116,7 @@ export class NativeAuthProvider {
     let users: NativeAuth[];
     try {
       users = await NativeAuthModel.find({
-        confirmationCode: code
+        confirmationCode: code,
       });
     } catch (error) {
       logger.error({ message: error, meta: 'native-provider' });
@@ -128,7 +128,7 @@ export class NativeAuthProvider {
       //TODO: Resend code functionality. args: email, search db for email etc.
       logger.warn({
         message: 'Could not find confirmation code in database.',
-        meta: 'native-provider'
+        meta: 'native-provider',
       });
       throw new Error(
         'Sorry, that confirmation code is invalid. Please use the "Resend Code" option.'
@@ -140,7 +140,7 @@ export class NativeAuthProvider {
       logger.error({
         message:
           'More than one instance of a unique validation code in the database!',
-        meta: 'native-provider'
+        meta: 'native-provider',
       });
       throw new Error(
         'Sorry, that confirmation code is invalid. Please use the "Resend Code" option.'
@@ -189,7 +189,7 @@ export class NativeAuthProvider {
     //FIXME: How did we get here??
     logger.error({
       message: 'Somehow we got here, work out how!',
-      meta: 'nativeauth-provider'
+      meta: 'nativeauth-provider',
     });
     throw new Error(NativeAuthModel.defaultErrorMessage);
   };
@@ -198,7 +198,7 @@ export class NativeAuthProvider {
 
     try {
       user = (await NativeAuthModel.findOne({
-        email: email.toLowerCase()
+        email: email.toLowerCase(),
       })) as NativeAuth;
     } catch (error) {
       logger.error({ message: error, meta: 'native-provider' });
@@ -210,7 +210,7 @@ export class NativeAuthProvider {
           message:
             'User tried to activate account using code, but account was already active: ' +
             user.username,
-          meta: 'native-provider'
+          meta: 'native-provider',
         });
         throw new Error('Account already activated. Please log in.');
       }
@@ -234,7 +234,7 @@ export class NativeAuthProvider {
   };
   loginUser = async ({
     username,
-    password
+    password,
   }: RegisterUserInput): Promise<Token> => {
     const user: NativeAuth = await this.authenticateUser(username, password);
 
@@ -243,7 +243,7 @@ export class NativeAuthProvider {
     } else {
       logger.warn({
         message: 'Incorrect login attempt for user: ' + username,
-        meta: 'native-provider'
+        meta: 'native-provider',
       });
       throw new Error('Username or password incorrect.');
     }
@@ -251,7 +251,7 @@ export class NativeAuthProvider {
   changePassword = async ({
     username,
     oldPassword,
-    newPassword
+    newPassword,
   }: ChangePassword): Promise<Boolean> => {
     // Lets validate the new password before we make any database calls
     passwordLength(newPassword, MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH);
@@ -277,7 +277,7 @@ export class NativeAuthProvider {
   changeEmail = async ({
     username,
     password,
-    newEmail
+    newEmail,
   }: ChangeEmail): Promise<Boolean> => {
     // Lets validate the new email before we make any database calls
     emailFormat(newEmail, EMAIL_REGEX);
@@ -298,7 +298,7 @@ export class NativeAuthProvider {
           {
             email: user.email,
             status: user.status,
-            confirmationCode: user.confirmationCode
+            confirmationCode: user.confirmationCode,
           },
           user
         );
@@ -342,7 +342,7 @@ export class NativeAuthProvider {
 
     try {
       user = (await NativeAuthModel.findOne({
-        username: username.toLowerCase()
+        username: username.toLowerCase(),
       })) as NativeAuth;
     } catch (error) {
       logger.error({ message: error, meta: 'native-provider' });
@@ -357,7 +357,7 @@ export class NativeAuthProvider {
     else {
       logger.warn({
         message: '[username] Incorrect login attempt for user: ' + username,
-        meta: 'native-provider'
+        meta: 'native-provider',
       });
       throw new Error('Username or password incorrect.');
     }
@@ -371,10 +371,10 @@ export class NativeAuthProvider {
       await NativeAuthModel.updateOne({ username: user.username }, user);
       logger.warn({
         message: `[password] ${user.loginAttempts} Incorrect login attempts for user: ${user.username}`,
-        meta: 'native-provider'
+        meta: 'native-provider',
       });
       throw new Error(
-        `Username or password incorrect. Login Attempt ${user.loginAttempts} / 4 before account is locked for security.`
+        `Username or password incorrect. Login Attempt ${user.loginAttempts} / 4.`
       );
     }
   };
