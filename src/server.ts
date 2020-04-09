@@ -27,7 +27,11 @@ if (MONGO_URI) {
 // abstract them away from the server file.
 const server = new ApolloServer({
   modules: [AppModule],
-  context: (session) => session,
+  context: (session) => {
+    console.log(session.req.headers.host);
+
+    return session;
+  },
 });
 
 server.listen(APOLLO_PORT).then(({ url }) => {
